@@ -160,7 +160,7 @@ FROM
 --w tym przypadku dzia³a podobnie do INNER JOIN
 
 --SELECT 
---	c.id, c.fullname, e.id, e.fullname
+--	c.id cid, c.fullname cfn, e.id eid, e.fullname efn
 --from 
 --	hr.candidates c
 --	left join hr.employees e
@@ -176,3 +176,21 @@ FROM
 --where
 --	e.fullname is null
 
+--teraz w dróg¹ stronê
+select 
+	c.id cid, c.fullname cfn, e.id eid, e.fullname efn
+from 
+	hr.candidates c
+	right join hr.employees e
+		on e.fullname = c.fullname
+
+--select
+--	c.id, c.fullname
+--from hr.candidates c
+
+select 
+	c.id cid, c.fullname cfn, e.id eid, e.fullname efn
+from 
+	hr.candidates c
+	FULL JOIN hr.employees e
+	on e.fullname = c.fullname
