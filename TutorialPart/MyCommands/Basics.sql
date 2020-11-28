@@ -49,11 +49,19 @@ GROUP BY
 -----£¹czenie wyników-----
 #£¹czenie wspólnych wyników z dwóch tabel
 SELECT
-	select_list
+	source.select_list, other_source.select_list
 FROM
 	source
 	INNER JOIN other_source
 		ON condition
+
+Left join - zostanie pobrana ca³a zawartoœæ lewej tabelki i taka sama iloœæ prawej
+Cross Join - do ka¿dego elementu z T1 zostanie do³¹czony element z T2
+SELECT
+	select_list
+FROM
+	T1
+CROSS JOIN T2;
 */
 
 --najwiêcej modeli jest z roku:
@@ -177,20 +185,64 @@ FROM
 --	e.fullname is null
 
 --teraz w dróg¹ stronê
-select 
-	c.id cid, c.fullname cfn, e.id eid, e.fullname efn
-from 
-	hr.candidates c
-	right join hr.employees e
-		on e.fullname = c.fullname
+--select 
+--	c.id cid, c.fullname cfn, e.id eid, e.fullname efn
+--from 
+--	hr.candidates c
+--	right join hr.employees e
+--		on e.fullname = c.fullname
 
 --select
 --	c.id, c.fullname
 --from hr.candidates c
 
-select 
-	c.id cid, c.fullname cfn, e.id eid, e.fullname efn
-from 
-	hr.candidates c
-	FULL JOIN hr.employees e
-	on e.fullname = c.fullname
+--select 
+--	c.id cid, c.fullname cfn, e.id eid, e.fullname efn
+--from 
+--	hr.candidates c
+--	FULL JOIN hr.employees e
+--	on e.fullname = c.fullname
+
+--jakie rodzaje rowerów najlepiej siê sprzedaj¹
+--select count(oi.quantity) quantity, cat.category_name
+--from sales.order_items oi
+
+--inner join production.products prod
+--	on oi.product_id = prod.product_id
+
+--inner join  production.categories cat
+--	on prod.category_id = cat.category_id
+
+--inner join sales.orders o
+--	on oi.order_id = o.order_id
+
+--where o.order_status = 4
+--group by cat.category_name
+--order by quantity desc
+
+--10 pracowników którzy obs³u¿yli najwiêcej klientów
+
+--select top 10 with ties o.staff_id, count(*) count
+--from sales.orders o
+--group by o.staff_id
+--order by count desc
+
+--znajdŸ produkty(ID) które nie maj¹ sprzeda¿y w sklepach
+--select *
+--from sales.orders o
+--right join sales.order_items oi
+--on oi.order_id = o.order_id
+--where o.order_status = 3
+--braæ pod uwagê ordery z order_status = 3 -> 'Rejected'? Tak, nie by³y nigdy zamówione albo by³y ale zamówienie wycofano
+
+--poka¿ sprzeda¿ poszczegulnych artyku³ów w poszczegulnych sklepach i ich stan magazynowy dla tych artyku³ów
+--articleId, shopId,  quantity(sales), quantity(warehouse)
+select p.product_name, s.store_name, oi.quantity sold
+from production.products p
+inner join production.stocks st on st.product_id = p.product_id 
+inner join sales.stores s on st.store_id = s.store_id
+inner join sales.orders o on o.store_id = s.store_id
+inner join sales.order_items oi on oi.order_id = o.order_id
+group by p.product_name, s.store_name, oi.quantity
+
+
