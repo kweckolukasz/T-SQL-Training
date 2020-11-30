@@ -114,11 +114,10 @@ CROSS JOIN T2;
 
 
 --zsumuj iloœæ zamówieñ klientów id 1,2 w poszczegulnych latach																	?????????????
---select o.customer_id ID, YEAR(o.order_date) year, count(o.customer_id) count
---from sales.orders o
---where customer_id in (1,2)
---group by o.customer_id, YEAR(o.order_date)
---order by year(o.order_date)
+--select customer_id, YEAR(order_date) year, count(*) orders
+--from sales.orders
+--where customer_id in (1,2) 
+--group by YEAR(order_date), customer_id
 
 --zsumuj klientów w poszczegulnych miastach
 --select c.city, COUNT(c.customer_id) clients
@@ -228,21 +227,66 @@ CROSS JOIN T2;
 --order by count desc
 
 --znajdŸ produkty(ID) które nie maj¹ sprzeda¿y w sklepach
---select *
---from sales.orders o
---right join sales.order_items oi
---on oi.order_id = o.order_id
---where o.order_status = 3
---braæ pod uwagê ordery z order_status = 3 -> 'Rejected'? Tak, nie by³y nigdy zamówione albo by³y ale zamówienie wycofano
+--SELECT
+--    s.store_id,
+--    p.product_id,
+--    ISNULL(sales, 0) sales
+--FROM
+--    sales.stores s
+--CROSS JOIN production.products p
+--LEFT JOIN (
+--    SELECT
+--        s.store_id,
+--        p.product_id,
+--        SUM (quantity * i.list_price) sales
+--    FROM
+--        sales.orders o
+--    INNER JOIN sales.order_items i ON i.order_id = o.order_id
+--    INNER JOIN sales.stores s ON s.store_id = o.store_id
+--    INNER JOIN production.products p ON p.product_id = i.product_id
+--    GROUP BY
+--        s.store_id,
+--        p.product_id
+--) c ON c.store_id = s.store_id
+--AND c.product_id = p.product_id
+--WHERE
+--    sales IS NULL
+--ORDER BY
+--    product_id,
+--    store_id;
+--															SELF JOIN
+--pair staff with their manager
+--select 
+--	e.first_name + ' ' + e.last_name as employee,
+--	m.first_name + ' ' + m.last_name as manager
+--from sales.staffs e
+--left join sales.staffs m
+--on e.manager_id = m.staff_id
+--order by m.manager_id
 
---poka¿ sprzeda¿ poszczegulnych artyku³ów w poszczegulnych sklepach i ich stan magazynowy dla tych artyku³ów
---articleId, shopId,  quantity(sales), quantity(warehouse)
-select p.product_name, s.store_name, oi.quantity sold
-from production.products p
-inner join production.stocks st on st.product_id = p.product_id 
-inner join sales.stores s on st.store_id = s.store_id
-inner join sales.orders o on o.store_id = s.store_id
-inner join sales.order_items oi on oi.order_id = o.order_id
-group by p.product_name, s.store_name, oi.quantity
+--locate customers that live in the same city
+--SELECT 
+--c.city, c.first_name + ' ' + c.last_name customer, c1.first_name + ' ' + c1.last_name customer
+--from sales.customers c
+--inner join sales.customers c1 on c1.city = c.city and c1.customer_id < c.customer_id
 
+-- find customers who placed at least two orders per year
+--select c.customer_id, YEAR(o.order_date) order_year, count(o.order_id)
+--from sales.customers c
+--inner join sales.orders o on o.customer_id = c.customer_id
+--group by c.customer_id, YEAR(o.order_date)
+--having count(o.order_id) >= 2
 
+--find sales orders whose net values are greater than 20 000
+--select order_id, SUM(quantity * list_price * (1 - discount)) net_value
+--from sales.order_items
+--group by order_id
+--having SUM(quantity * list_price * (1 - discount)) > 20000
+--order by net_value
+
+--find max and min price in each product category if max price > 4000 and min price < 500
+--select
+--category_id, MAX(list_price) maximum_price, MIN(list_price) minimum_price
+--from production.products
+--group by category_id
+--having max(list_price) > 4000 and min(list_price) < 500
